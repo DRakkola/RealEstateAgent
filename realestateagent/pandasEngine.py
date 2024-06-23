@@ -59,7 +59,7 @@ Expression: """
         Response:
         """
     )
-    query_engine = PandasQueryEngine(df=data, synthesize_response=True)
+    query_engine = PandasQueryEngine(df=data, synthesize_response=True, verbose=True)
 
     # print(prompts["response_synthesis_prompt"])
     query_engine.update_prompts(
