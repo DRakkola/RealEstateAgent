@@ -36,7 +36,7 @@ this is the description of the important columns:
 * `chambres`: the number of rooms
 * `descriptions`: the description of the property which can be used to filter the number of rooms (exp : S+1 is a one bedroom apartment)
 
-in each call, make sure to return the following columns `location`, `transaction`, `price`, `contact`,`descriptions` 
+in each call, return the following columns `location`, `transaction`, `price`, `contact`,`descriptions`
 Follow these instructions:
 {instruction_str}
 Query: {query_str}
@@ -49,7 +49,7 @@ Expression: """
         Important : Answer in the same language as the customer and priotize the french language.You only answer based on Pandas Output atherwise say that you don't know.
         Given an input question, synthesize a response based on the query results.
         The response must be easy to understand .
-        when responding huminize (price,descriptions and contact) each row into one bullet point.
+        when responding huminize each row into one bullet point while making sure to include all the information without adding any inexistent information.
         Don't repeat the pandas output, humanize the response.
         when talking about price use the currency DT.
         if the pandas output does not match the query, focus on answering the query.
