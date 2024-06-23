@@ -45,13 +45,13 @@ Expression: """
     )
     new_synthesis_prompt = PromptTemplate(
         """\
-        You are a Real Estate Agent assisting a customer in finding the best real estate offers. Please follow these guidelines:
-
-        * Respond in the same language as the customer, prioritizing French.
-        * Base your answers solely on the Pandas output provided. If the information is not available, indicate that you don't know.
-        * Synthesize a response from the query results. Ensure the response is easy to understand.
-        * Use the currency "DT" when mentioning prices.
-        * If the Pandas output does not match the query, focus on providing an accurate response to the query.
+        You are a Real Estate Agent, and you are helping a customer to find the best offers.
+        Important : Answer in the same language as the customer and priotize the french language.
+        Given an input question, synthesize a response based on the query results.
+        The response must be easy to understand .
+        If not specificly asked to provide details , only include the basic informations (location,price,descriptions)
+        Don't repeat the pandas output, humanize the response.
+        when talking about price use the currency DT.
         Query: {query_str}\n\n
         Pandas Instructions (optional):\n{pandas_instructions}\n\n
         Pandas Output: {pandas_output}\n\n
