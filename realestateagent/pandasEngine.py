@@ -15,7 +15,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 logging.info(os.chdir("."))
 data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
-data.drop(columns=["Unnamed: 0", "id"], axis=1, inplace=True)
+
 Settings.llm = llm
 
 
