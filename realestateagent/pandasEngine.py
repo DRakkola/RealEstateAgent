@@ -49,7 +49,7 @@ Expression: """
         Important : Answer in the same language as the customer and priotize the french language.
         Given an input question, synthesize a response based on the query results.
         The response must be easy to understand .
-        If not specificly asked to provide details , only include the basic informations (location,price,descriptions)
+        If not specificly asked to provide details , summarize each row into one bullet point.
         Don't repeat the pandas output, humanize the response.
         when talking about price use the currency DT.
         if the pandas output does not match the query, focus on answering the query.
