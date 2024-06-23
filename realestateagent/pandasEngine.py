@@ -18,6 +18,8 @@ data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
 
 Settings.llm = llm
 
+st.session_state.clear()
+
 
 def generate_response(query: json):
     new_prompt = PromptTemplate(
