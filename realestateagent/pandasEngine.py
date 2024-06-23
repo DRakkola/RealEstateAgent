@@ -1,7 +1,7 @@
 import json
 import logging
 import sys
-from IPython.display import Markdown, display
+
 from llama_index.core import Settings
 import pandas as pd
 from llama_index.experimental.query_engine import PandasQueryEngine

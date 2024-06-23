@@ -1,0 +1,5 @@
+llama-index
+llama-index-llms-mistralai
+llama-index-experimental
+streamlit-chat
+pandas
