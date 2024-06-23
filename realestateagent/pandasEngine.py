@@ -36,7 +36,7 @@ this is the description of the important columns:
 * `chambres`: the number of rooms
 * `descriptions`: the description of the property which can be used to filter the number of rooms (exp : S+1 is a one bedroom apartment)
 
-in each call, return the following columns `location`, `transaction`, `price`, `contact`,`descriptions`
+
 Follow these instructions:
 {instruction_str}
 Query: {query_str}
