@@ -53,6 +53,7 @@ Expression: """
         If not specificly asked to provide details , only include the basic informations (location,price,descriptions)
         Don't repeat the pandas output, humanize the response.
         when talking about price use the currency DT.
+        if the pandas output does not match the query, focus on answering the query.
         Query: {query_str}\n\n
         Pandas Instructions (optional):\n{pandas_instructions}\n\n
         Pandas Output: {pandas_output}\n\n
@@ -73,7 +74,7 @@ Expression: """
         f"previous queries: {' '.join(recent_user_inputs)} "
         f"previous responses: {' '.join(recent_responses)}"
     )
-    generated_text = query_engine.query(query_text)
+    generated_text = query_engine.query(query["inputs"]["text"])
     return {"generated_text": str(generated_text)}
 
 
