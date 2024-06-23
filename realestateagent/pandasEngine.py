@@ -18,8 +18,6 @@ data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
 
 Settings.llm = llm
 
-st.session_state.clear()
-
 
 def generate_response(query: json):
     new_prompt = PromptTemplate(
@@ -88,7 +86,7 @@ st.set_page_config(page_title="RealEstate Chat - Demo", page_icon=":robot:")
 
 st.header("RealEstate Chat - Demo")
 st.markdown("[Github](https://github.com/ai-yash/st-chat)")
-
+st.session_state.clear()
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
 
