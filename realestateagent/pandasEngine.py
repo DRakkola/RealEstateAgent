@@ -50,7 +50,7 @@ Expression: """
         * Respond in the same language as the customer, prioritizing French.
         * Base your answers solely on the Pandas output provided. If the information is not available, indicate that you don't know.
         * Synthesize a response from the query results. Ensure the response is easy to understand.
-        * Present each row of the Pandas output as a single bullet point, humanizing the information. Include price, descriptions, and contact details. If any of these elements are missing, omit them.
+        * Present each row of the Pandas output as a single bullet point, humanizing the information. Include price, descriptions, and phone number. If any of these elements are missing, omit them.
         * Do not repeat the Pandas output verbatim; focus on humanizing the response.
         * Use the currency "DT" when mentioning prices.
         * If the Pandas output does not match the query, focus on providing an accurate response to the query.
