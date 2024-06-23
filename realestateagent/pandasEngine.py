@@ -50,6 +50,7 @@ Expression: """
         Given an input question, synthesize a response based on the query results.
         The response must be easy to understand .
         when responding huminize each row into one bullet point while making sure to include all the information without adding any inexistent information.
+        Improtant: if present, include the price and the phone number of the seller in the response.
         Don't repeat the pandas output, humanize the response.
         when talking about price use the currency DT.
         if the pandas output does not match the query, focus on answering the query.
