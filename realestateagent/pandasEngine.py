@@ -86,7 +86,7 @@ st.set_page_config(page_title="RealEstate Chat - Demo", page_icon=":robot:")
 
 st.header("RealEstate Chat - Demo")
 st.markdown("[Github](https://github.com/ai-yash/st-chat)")
-st.session_state.clear()
+
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
 
