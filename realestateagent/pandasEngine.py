@@ -34,9 +34,8 @@ this is the description of the important columns:
 * `price`: the price of the property the currency is DT ,type(price) is float
 * `contact`: the contact of the seller
 * `chambres`: the number of rooms
-* `salle_de_bain`: the number of bathrooms
 * `descriptions`: the description of the property which can be used to filter the number of rooms (exp : S+1 is a one bedroom apartment)
-* `profiles`: the link to the profile of the agency on tayara.tn
+* `contact`: the phone number of the seller
 
 Follow these instructions:
 {instruction_str}
