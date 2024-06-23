@@ -13,7 +13,7 @@ llm = MistralAI(api_key="XWVBd37gZ0dE1KdYgqTLaWIvJ2kvMHSy")
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
-data = pd.read_csv("data_prices_cleaned.csv")
+data = pd.read_csv("./data_prices_cleaned.csv")
 
 Settings.llm = llm
 
