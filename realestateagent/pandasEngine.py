@@ -7,12 +7,13 @@ import pandas as pd
 from llama_index.experimental.query_engine import PandasQueryEngine
 from llama_index.llms.mistralai import MistralAI
 from llama_index.core import PromptTemplate
+import os
 
 llm = MistralAI(api_key="XWVBd37gZ0dE1KdYgqTLaWIvJ2kvMHSy")
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
-
+print(os.chdir())
 data = pd.read_csv("data_prices_cleaned.csv")
 
 Settings.llm = llm
