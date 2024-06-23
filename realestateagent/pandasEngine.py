@@ -15,7 +15,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 logging.info(os.chdir("."))
 data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
-
+data.drop(columns=["Unnamed: 0", "id"], axis=1, inplace=True)
 Settings.llm = llm
 
 
@@ -36,7 +36,7 @@ this is the description of the important columns:
 * `chambres`: the number of rooms
 * `descriptions`: the description of the property which can be used to filter the number of rooms (exp : S+1 is a one bedroom apartment)
 
-
+in each call, make sure to return the following columns `location`, `transaction`, `price`, `contact`,`descriptions` 
 Follow these instructions:
 {instruction_str}
 Query: {query_str}
