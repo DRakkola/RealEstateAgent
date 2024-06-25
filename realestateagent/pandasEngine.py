@@ -15,7 +15,7 @@ import ast
 # Initialize logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
-data = pd.read_csv("data/data_prices_cleaned.csv")
+data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
 # Initialize Streamlit page configuration
 st.set_page_config(page_title="Streamlit Chat - Demo", page_icon=":robot:")
 st.header("RealEstate Chat")
