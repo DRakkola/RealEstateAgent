@@ -80,11 +80,11 @@ import streamlit as st
 from streamlit_chat import message
 
 
-st.set_page_config(page_title="RealEstate Chat - Demo", page_icon=":robot:")
+st.set_page_config(page_title="RealEstate Chat", page_icon=":robot:")
 
 
-st.header("RealEstate Chat - Demo")
-st.markdown("[Github](https://github.com/ai-yash/st-chat)")
+st.header("RealEstate Chat")
+# st.markdown("[Github](https://github.com/ai-yash/st-chat)")
 
 if "generated" not in st.session_state:
     st.session_state["generated"] = []
@@ -99,7 +99,7 @@ def query(payload):
 
 
 def get_text():
-    input_text = st.text_input("You: ", "Hello, how are you?", key="input")
+    input_text = st.text_input("You: ", key="input")
     return input_text
 
 
