@@ -3,3 +3,6 @@ llama-index-llms-mistralai
 llama-index-experimental
 streamlit-chat
 pandas
+mistralai
+sentence-transformers
+qdrant-client
