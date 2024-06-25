@@ -17,9 +17,9 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
 # Initialize Streamlit page configuration
-st.set_page_config(page_title="Streamlit Chat - Demo", page_icon=":robot:")
-st.header("RealEstate Chat")
-st.markdown("[:red[Neuron-Q]]")
+st.set_page_config(page_title="Neuralytics - Real Estate", page_icon=":robot:")
+st.header("Neuralytics - Real Estate")
+st.markdown(":red[Neuron-Q]")
 
 # Initialize session state variables
 if "generated" not in st.session_state:
@@ -37,7 +37,7 @@ qdrant_client = QdrantClient(
 )
 
 # Initialize SentenceTransformer encoder
-encoder = SentenceTransformer("all-MiniLM-L6-v2")
+encoder = SentenceTransformer("realestateagent/model")
 
 # Set MistralAI instance in settings
 from llama_index.core import Settings
