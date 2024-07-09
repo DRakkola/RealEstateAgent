@@ -15,7 +15,7 @@ import ast
 # Initialize logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
-data = pd.read_csv("realestateagent/data_prices_cleaned.csv")
+data = pd.read_csv("realestateagent/realtor-data.csv")
 # Initialize Streamlit page configuration
 st.set_page_config(page_title="Neuralytics - Real Estate", page_icon=":robot:")
 st.header("Neuralytics - Real Estate")
@@ -46,13 +46,22 @@ Settings.llm = llm
 
 
 # Initialize MistralClient for chat functionality
-def run_mistral(user_message, model="mistral-medium", system=None):
+def run_mistral(user_message, model="mistral-medium", system=None, output_format=None):
     # logging.info("Calling run_mistral function")
     client = MistralClient(api_key=api_key)
     if system is None:
         messages = [{"role": "user", "content": user_message}]
         chat_response = client.chat(model=model, messages=messages)
 
+    elif output_format is not None:
+        chat_response = client.chat(
+            model="open-mixtral-8x7b",
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user_message},
+            ],
+            response_format={"type": "json_object"},
+        )
     else:
         chat_response = client.chat(
             model="open-mixtral-8x7b",
@@ -61,13 +70,15 @@ def run_mistral(user_message, model="mistral-medium", system=None):
                 {"role": "user", "content": user_message},
             ],
         )
-
     return chat_response.choices[0].message.content
 
 
 def run_codestral(user_message):
     client = MistralClient(api_key=api_key)
-    messages = [{"role": "user", "content": user_message}]
+    messages = [
+        {"role": "user", "content": user_message},
+    ]
+
     chat_response = client.chat(model="codestral-latest", messages=messages)
     return chat_response.choices[0].message.content
 
@@ -168,7 +179,6 @@ def execute_pandas(query, data=data):
             Expression: 
             """
         )
-
         query_engine = PandasQueryEngine(df=data, verbose=False)
 
         # print(prompts["response_synthesis_prompt"])
@@ -184,9 +194,8 @@ def execute_pandas(query, data=data):
 
 
 def execute_pandas_query(query, data=data):
-    try:
-        df = data.copy()
-        prompt = f"""
+    df = data.copy()
+    prompt = f"""
             You are working with a pandas dataframe in Python.
             The name of the dataframe is `df`.
             This is the result of `print(df.head())`:
@@ -195,26 +204,25 @@ def execute_pandas_query(query, data=data):
             {df.info()}
             This is the result of `print(df.describe())`:
             {df.describe()}
-            This is the result of `print(df.columns)`:
-            {df.columns}
             this is the description of the important columns:
-            * `location`: the location of the property (State,city)
-            * `transaction`: the type of transaction ['sale' OR 'rent']
-            * `price`: the price of the property the currency is DT ,type(price) is float
-            * `contact`: the contact of the seller
-            * `category`: the category of the property ['Appartements', 'Maisons et Villas', 'Terrains et Fermes',
-                'Magasins, Commerces et Locaux industriels', 'Autres Immobiliers',
-                'Bureaux et Plateaux', 'Colocations', 'Locations de vacances']
-            * `chambres`: the number of rooms
-            * `salle_de_bain`: the number of bathrooms
-            * `descriptions`: the description of the property which can be used to filter the number of rooms (exp : S+1 is a one bedroom apartment)
-            * `profiles`: the link to the profile of the agency on tayara.tn
+            * brokered by (categorically encoded agency/broker)
+            * status (Housing status - a. ready for sale or b. ready to build)
+            * price (Housing price, it is either the current listing price or recently sold price if the house is sold recently)
+            * bed (# of beds)
+            * bath (# of bathrooms)
+            * acre_lot (Property / Land size in acres)
+            * street (categorically encoded street address)
+            * city (city name)
+            * state (state name)
+            * zip_code (postal code of the area)
+            * house_size (house area/size/living space in square feet)
+            * prev_sold_date (Previously sold date)
             
             Query: {query}
 
             Expression: 
         """
-        system = """
+    system = """
             Follow these instructions:
             1. Convert the query to executable Python code using Pandas.\n
             2. The final line of code should be a Python expression that can be called with the `eval()` function.\n
@@ -223,56 +231,72 @@ def execute_pandas_query(query, data=data):
             5. Do not quote the expression.\n
             6. Do not provide any notes or explenations.\n
         """
-        expression = run_mistral(prompt, system=system)
+    expression = run_mistral(prompt, system=system)
+
+    try:
         # logging.info(f"query: {query}")
         return f"query: {query} \nExpression: {expression}\nOutput: {eval(expression)}"
-    except:
-
-        logging.info(">>>>>> cought exception")
+    except Exception as e:
+        logging.info(f">>>>>> cought exception : {e}")
+        new_prompt = """
+        the execution of this expression ({expression}) failed with the following error:
+        ({e})
+        Try rewriting the expression to avoid errors. while staying within the constraints of the query ({query}).
+        """.format(
+            expression=expression, e=e, query=query
+        )
+        expression = run_codestral(new_prompt)
+        try:
+            return (
+                f"query: {query} \nExpression: {expression}\nOutput: {eval(expression)}"
+            )
+        except Exception as e:
+            logging.info(f">>>>>> cought exception : {e}")
+            return f"query: {query} \nExpression: {expression}\nOutput: {e}"
 
 
 # Function to generate questions based on the query for data analysis
 def analyse(query, data=data):
     # logging.info("Calling analyse function")
     prompt = """
-        You are a senior data analyst. Your task is to generate questions to ask about the data in order to perfectly answer the query.
-        You will generate a maximum of 10 questions depending on the complexity of the query.
-        The data you will use is the real estate prices in Tunisia.
-        This is the result of `print(df.head())`:
-            {}
-            This is the result of `print(df.info())`:
-            {}
-            This is the result of `print(df.describe())`:
-            {}
-            This is the result of `print(df.columns)`:
-            {}
-            this is the description of the important columns:
-            * `location`: the location of the property (State,city)
-            * `transaction`: the type of transaction ['sale' OR 'rent']
-            * `price`: the price of the property the currency is DT ,type(price) is float
-            * `category`: the category of the property ['Appartements', 'Maisons et Villas', 'Terrains et Fermes',
-                'Magasins, Commer
+        Task: Your task is to generate a concise set of questions to extract the most relevant data that directly addresses the stakeholder's query. Focus on asking only the essential questions needed to obtain clear and actionable insights.
+
+        Instructions:
+
+        - Generate a maximum of 10 questions.
+        - Ensure each question is directly aligned with the stakeholder's query to maintain clarity and precision in the analysis.
+        - Avoid redundant or overly broad questions.
+        this is a description of the data you're working with:
+        This dataset contains Real Estate listings in the US broken by State and zip code.
+            * brokered by (categorically encoded agency/broker)
+            * status (Housing status - a. ready for sale or b. ready to build)
+            * price (Housing price, it is either the current listing price or recently sold price if the house is sold recently)
+            * bed (# of beds)
+            * bath (# of bathrooms)
+            * acre_lot (Property / Land size in acres)
+            * street (categorically encoded street address)
+            * city (city name)
+            * state (state name)
+            * zip_code (postal code of the area)
+            * house_size (house area/size/living space in square feet)
+            * prev_sold_date (Previously sold date)
         Stricktly return a List of questions. Do not include the word "question". Do not provide explanations or notes.
-        <<<>>>
-        Here are some examples:
-        - Query: Can you provide the market trend in Ariana?
-          Questions: ['What are the average property prices in Ariana for sale and rent?', 'What is the trend in the number of property listings in Ariana over time?', 'What are the most common property categories in Ariana?', 'How do the average prices vary by the number of rooms in Ariana?', 'Are there any notable differences in property prices based on the city areas within Ariana?']
         
-        - Query: What are the market trends?
-          Questions: ['What are the overall market trends, considering both sale and rent transactions?', 'How have property prices trended over time?', 'What factors are influencing the current market conditions?', 'Can you provide insights into the demand-supply dynamics of properties?']
-        <<<>>>
         Query: {}
         """.format(
-        data.head(), data.info(), data.describe(), data.columns, query
+        query
     )
     system = """
-            Stricktly return a List of questions. Do not include the word "question". Do not provide explanations or notes.
+            You are a senior data analyst.Stricktly return a JSON object containing the List  of questions in this format `{questions:[....]}`. Do not provide explanations or notes.
         """
-    return run_mistral(prompt, system=system)
+
+    return run_mistral(prompt, system=system, output_format="json")
 
 
-def deep_analyse(questions):
+def deep_analyse(questions, query):
     results = []
+
+    questions.insert(0, query)
     for question in questions:
         # output = execute_pandas(question)
         output = execute_pandas_query(question)
@@ -314,24 +338,26 @@ def synthesize_ranalyse_response(query, questions):
         
         
 
-        ## Task Details:
+        As an experienced data analyst, your task is to analyze the provided data to derive insights and answer a specific query. Your analysis should be clear, comprehensive, and directly relevant to the given problem statement.
+        Task Details:
         You will be provided with:
-        - A specific query (`Query:`) that outlines the problem to be solved or the question to be answered.
-        - Intermediary questions (`Questions and pandas outputs:`) along with their corresponding outputs generated using pandas.
-        - You can use your knowledge outside of the provided data to further refine your analysis and provide more comprehensive insights.
-        ## Requirements:
-        - Don't mention that you are using pandas in your response.
-        - Utilize the pandas outputs provided to generate a final analysis that addresses the query effectively.
-        - Ensure your response is well-structured and formatted using Markdown.
-        - Focus on clarity and completeness in your analysis, providing meaningful interpretations and insights based on the data.
-        - Don't repeat the pandas outputs in your response, use table markdowns to provide a clear and concise summary of the data.
-        - the currency is Tunisian Dinar.
-        - always use metric system
-        - don't include questions that does not have a correct pandas output.
-        # Query:
+
+        A specific query (Query:) that outlines the problem to be solved or the question to be answered.
+        Intermediary questions (Questions and pandas outputs:) along with their corresponding outputs generated using pandas.
+        You may use your external knowledge to further refine your analysis and provide more comprehensive insights.
+
+        Requirements:
+        Do not mention the use of pandas in your response.
+        Utilize the provided pandas outputs to generate a final analysis that effectively addresses the query.
+        Ensure your response is well-structured and formatted using Markdown.
+        Focus on clarity and completeness in your analysis, providing meaningful interpretations and insights based on the data.
+        Do not repeat the pandas outputs in your response; use table markdowns to provide a clear and concise summary of the data.
+        Always use the metric system.
+        Do not include questions that do not have a correct pandas output.
+        Query:
         {}
-        
-        # Questions and pandas outputs:
+
+        Questions and pandas outputs:
         {}
         
         
@@ -339,8 +365,11 @@ def synthesize_ranalyse_response(query, questions):
         query, questions
     )
     system = """
-        As an experienced data analyst, your task is to analyze provided data to derive insights and answer a specific query. 
-        Your analysis should be clear, comprehensive, and directly relevant to the given problem statement.
+        As a skilled data analyst, present the data in a clear and concise manner.
+        Interpret the data critically, relating it to the stakeholder's specific interests or concerns and highlighting its impact on their goals or objectives. 
+        Provide necessary background information or context to ensure the stakeholder fully understands the data.
+        don't mention any code snippets in your response.
+        Use your expertise to offer meaningful insights and thoughtful analysis.
     """
     return run_mistral(prompt, system=system)
 
@@ -375,10 +404,13 @@ def generate_response(query: json):
         analyse_questions = analyse(query["inputs"]["text"])
         logging.info(f">>>>> analyse_questions: {analyse_questions}")
         Questions = ast.literal_eval(analyse_questions)
-        res = deep_analyse(Questions)
+        Questions = Questions["questions"]
+        # logging.info(f">>>>> Questions: {type(Questions)}")
+
+        res = deep_analyse(Questions, query["inputs"]["text"])
         Questions_str = "\n".join(str(item) for item in res)
         response = synthesize_ranalyse_response(query["inputs"]["text"], Questions_str)
-        logging.info(f">>> Questions: {type(Questions)}")
+        # logging.info(f">>> Questions: {type(Questions)}")
 
     # Assuming the Pandas dataframe `data` is global and accessible
 
@@ -402,7 +434,7 @@ def handle_user_input():
             }
         )
 
-        st.session_state.generated.append(output["generated_text"])
+        st.session_state.generated.append(output["generated_text"].replace("$", "\$"))
         st.session_state.past.append(user_input)
 
     if st.session_state["generated"]:
